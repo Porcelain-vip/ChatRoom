@@ -17,7 +17,7 @@ public class ChatServer {
     private ServerSocket serverSocket = null;
     private Socket socket = null;
     //可能会有多个客户端线程请求连接，那么就使用一个集合来保存这些客户端线程
-    private List<ClientThread> clients = new ArrayList<>();
+    private List<ClientRunnable> clients = new ArrayList<>();
 
     public static void main(String[] args) {
         new ChatServer().launch();
@@ -45,21 +45,21 @@ public class ChatServer {
             //建立服务器端口号，ip地址就是本机ip
             serverSocket = new ServerSocket(30000);
             //开启服务端侦听客户端连接线程
-            new Thread(new ServerSpyThread()).start();
+            new Thread(new ServerSpyRunnable()).start();
 
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
     }
 
-    private void runClientThread(Socket socket) {
-        ClientThread clientThread = new ClientThread(socket);
-        clients.add(clientThread); //向集合中添加客户端线程
-        new Thread(clientThread).start(); //启动客户端线程
+    private void runClientRunnable(Socket socket) {
+        ClientRunnable clientRunnable = new ClientRunnable(socket);
+        clients.add(clientRunnable); //向集合中添加客户端线程
+        new Thread(clientRunnable).start(); //启动客户端线程
     }
 
     //服务端侦听客户端连接线程
-    private class ServerSpyThread implements Runnable {
+    private class ServerSpyRunnable implements Runnable {
         @Override
         public void run() {
             try {
@@ -70,7 +70,7 @@ public class ChatServer {
                     //这是一个阻塞的方法，可能会阻塞main线程，最好的方法是单独开启一个线程去实现服务器监听客户端的连接
                     socket = serverSocket.accept();
                     System.out.println("有客户端连接到了本机的30000端口");
-                    runClientThread(socket);
+                    runClientRunnable(socket);
                 }
             } catch (BindException be) {
                 System.out.println("30000端口被占用了");
@@ -83,7 +83,7 @@ public class ChatServer {
     }
 
     //服务器中的客户端线程
-    private class ClientThread implements Runnable {
+    private class ClientRunnable implements Runnable {
 
         private Socket socket = null;
         private DataInputStream dataInputStream = null;
@@ -91,7 +91,7 @@ public class ChatServer {
         private boolean started = false;
 
         //运行在服务器端的客户端线程
-        ClientThread(Socket socket) {
+        ClientRunnable(Socket socket) {
             this.socket = socket;
         }
 
@@ -130,7 +130,7 @@ public class ChatServer {
                     //服务器端接收客户端发送过来的数据
                     String str = dataInputStream.readUTF();
                     //服务器端向所有客户端发送消息
-                    for (ClientThread c : clients) {
+                    for (ClientRunnable c : clients) {
                         c.dataOutputStream.writeUTF(str);
                     }
                 }

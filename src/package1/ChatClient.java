@@ -41,7 +41,7 @@ public class ChatClient {
         //初始化图形界面
         initGUI();
         //启动客户端线程
-        new Thread(new ChatClientThread()).start();
+        new Thread(new ChatClientRunnable()).start();
     }
 
     private void initGUI() {
@@ -101,7 +101,7 @@ public class ChatClient {
     }
 
     //运行在本地计算机上的客户端线程
-    private class ChatClientThread implements Runnable {
+    private class ChatClientRunnable implements Runnable {
         @Override
         public void run() {
             //建立和服务器端的连接
