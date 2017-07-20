@@ -52,6 +52,12 @@ public class ChatServer {
         }
     }
 
+    private void runClientThread(Socket socket) {
+        ClientThread clientThread = new ClientThread(socket);
+        clients.add(clientThread); //向集合中添加客户端线程
+        new Thread(clientThread).start(); //启动客户端线程
+    }
+
     //服务端侦听客户端连接线程
     private class ServerSpyThread implements Runnable {
         @Override
@@ -64,9 +70,7 @@ public class ChatServer {
                     //这是一个阻塞的方法，可能会阻塞main线程，最好的方法是单独开启一个线程去实现服务器监听客户端的连接
                     socket = serverSocket.accept();
                     System.out.println("有客户端连接到了本机的30000端口");
-                    ClientThread clientThread = new ClientThread(socket);
-                    clients.add(clientThread); //向集合中添加客户端线程
-                    new Thread(clientThread).start(); //启动客户端线程
+                    runClientThread(socket);
                 }
             } catch (BindException be) {
                 System.out.println("30000端口被占用了");
@@ -92,7 +96,7 @@ public class ChatServer {
         }
 
         //建立与客户端的连接
-        private void setStarted(boolean started) {
+        private void setClientStarted(boolean started) {
             try {
                 InputStream inputStream = socket.getInputStream();
                 OutputStream outputStream = socket.getOutputStream();
@@ -120,7 +124,7 @@ public class ChatServer {
         @Override
         public void run() {
             try {
-                setStarted(true);
+                setClientStarted(true);
                 //用一个循环不停地监视各个客户端发送过来得套接字，然后服务端再向各个客户端转发套接字
                 while (started) {
                     //服务器端接收客户端发送过来的数据

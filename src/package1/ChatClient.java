@@ -32,19 +32,19 @@ public class ChatClient {
             public void run() {
                 //建立一个客户端对象
                 ChatClient chatClient = new ChatClient();
-                chatClient.launch();
+                chatClient.launchClient();
             }
         });
     }
 
-    private void launch() {
+    private void launchClient() {
         //初始化图形界面
-        this.initJFrame();
+        initGUI();
         //启动客户端线程
-        this.getChatClientThread().start();
+        new Thread(new ChatClientThread()).start();
     }
 
-    private void initJFrame() {
+    private void initGUI() {
 
         JFrame jFrame = new JFrame("客户端");
         jFrame.setLocation(300, 300);
@@ -67,10 +67,6 @@ public class ChatClient {
                 System.exit(0);
             }
         });
-    }
-
-    private Thread getChatClientThread() {
-        return new Thread(new ChatClientThread());
     }
 
     //打开客户端连接
